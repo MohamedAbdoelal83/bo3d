@@ -237,7 +237,6 @@
             background: #6d28d9;
         }
 
-        /* المودالز والنوافذ المنبثقة متوافقة مع الموبايل */
         .password-modal, .admin-modal {
             position: fixed;
             top: 0;
@@ -306,7 +305,6 @@
             cursor: pointer;
         }
 
-        /* السلة الجانبية للموبايل */
         .cart-drawer {
             position: fixed;
             top: 0;
@@ -449,7 +447,7 @@
         </div>
     </div>
 
-    <!-- نافذة إدخال كلمة السر السرية -->
+    <!-- نافذة كلمة السر -->
     <div class="password-modal" id="passwordModal">
         <div class="admin-card">
             <button class="close-admin" onclick="closePasswordModal()">&times;</button>
@@ -462,7 +460,7 @@
         </div>
     </div>
 
-    <!-- لوحة التحكم لإضافة المنتجات -->
+    <!-- لوحة التحكم -->
     <div class="admin-modal" id="adminModal">
         <div class="admin-card">
             <button class="close-admin" onclick="toggleAdminModal()">&times;</button>
@@ -500,7 +498,6 @@
 
         let cart = [];
 
-        // خدعة النقر المزدوج في الفوتر
         document.getElementById('secretTrigger').addEventListener('dblclick', () => {
             document.getElementById('passwordModal').style.display = 'flex';
             document.getElementById('secretInputPass').value = '';
@@ -605,7 +602,7 @@
 
             } catch (error) {
                 console.error(error);
-                alert('حدث خطأ أثناء الرفع. تأكد من إعدادات سوبابيس (Bucket: products-images).');
+                alert('خطأ أثناء الرفع: ' + (error.message || 'تأكد من إعدادات سوبابيس (Bucket: products-images).'));
             }
         }
 
@@ -653,14 +650,13 @@
 
             const productNames = cart.map(item => `${item.name} (${item.price} ج.م)`).join(' + ');
 
-            // تم مطابقة الأعمدة بدقة مع جدول orders في Supabase
             const { error } = await _supabase.from('orders').insert([
                 { customer_name: name, customer_phone: phone, product_name: productNames }
             ]);
 
             if (error) {
                 console.error(error);
-                alert('حدث خطأ أثناء إتمام الطلب. تأكد من أسماء الأعمدة في جدول orders (customer_name, customer_phone, product_name).');
+                alert('خطأ في إتمام الطلب: ' + (error.message || 'تأكد من جدول orders في Supabase.'));
             } else {
                 alert('تم إتمام طلبك بنجاح! هنتواصل معاك في أسرع وقت.');
                 cart = [];
@@ -674,7 +670,6 @@
 
         fetchProducts();
 
-        // خلفية Three.js
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ alpha: true });
