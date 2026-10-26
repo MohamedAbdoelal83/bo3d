@@ -3,847 +3,509 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر بُعد | Ba'ad 3D Store - منصة الأصول ثلاثية الأبعاد</title>
-    
-    <!-- Google Fonts (Cairo) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-    
-    <!-- FontAwesome Icons -->
+    <title>متجر بُعد | عالم الـ 3D</title>
+    <!-- خط Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome للأيقونات -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            dark: '#0B0D17',
-                            card: '#151828',
-                            purple: '#8B5CF6',
-                            cyan: '#06B6D4',
-                            accent: '#3B82F6',
-                            glow: '#A855F7'
-                        }
-                    },
-                    fontFamily: {
-                        cairo: ['Cairo', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
-    
-    <!-- Three.js Library -->
+    <!-- Three.js لخلفية الـ 3D التفاعلية -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- مكتبة Supabase للاتصال بقاعدة البيانات -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        body {
+        :root {
+            --bg-primary: #0b0f19;
+            --bg-secondary: #131b2e;
+            --accent-purple: #8b5cf6;
+            --accent-cyan: #06b6d4;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --card-bg: rgba(19, 27, 46, 0.7);
+            --border-color: rgba(139, 92, 246, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
             font-family: 'Cairo', sans-serif;
-            background-color: #0B0D17;
-            color: #F3F4F6;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
             overflow-x: hidden;
+            position: relative;
         }
 
-        /* Glassmorphism Effect */
-        .glass {
-            background: rgba(21, 24, 40, 0.7);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        /* خلفية Three.js */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
         }
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .glass-card:hover {
-            border-color: rgba(139, 92, 246, 0.4);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px -10px rgba(139, 92, 246, 0.3);
-        }
-
-        /* Glowing text & borders */
-        .text-glow-purple {
-            text-shadow: 0 0 15px rgba(139, 92, 246, 0.6);
-        }
-        
-        .text-glow-cyan {
-            text-shadow: 0 0 15px rgba(6, 182, 212, 0.6);
-        }
-
-        .border-glow {
-            box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0B0D17;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #26293B;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #8B5CF6;
-        }
-
-        /* Canvas Overlay */
-        #hero-canvas {
-            position: absolute;
+        /* الهيدر وشريط التنقل */
+        header {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
+            background: rgba(11, 15, 25, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-cyan);
+        }
+
+        .cart-btn {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+            transition: 0.3s;
+        }
+
+        .cart-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* قسم الهيرو (الواجهة) */
+        .hero {
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 1rem;
+            margin-top: 60px;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero h1 span {
+            color: var(--accent-cyan);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin-bottom: 2rem;
+        }
+
+        /* حاوية المنتجات */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 5%;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            border-right: 4px solid var(--accent-cyan);
+            padding-right: 15px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .product-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 10px 30px rgba(6, 182, 212, 0.15);
+        }
+
+        .product-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #1e293b;
+        }
+
+        .product-content {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: space-between;
+        }
+
+        .product-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .product-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .product-price {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--accent-cyan);
+        }
+
+        .buy-btn {
+            background: var(--accent-purple);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .buy-btn:hover {
+            background: #7c3aed;
+        }
+
+        /* السلة الجانبية */
+        .cart-drawer {
+            position: fixed;
+            top: 0;
+            left: -400px;
+            width: 380px;
             height: 100%;
-            z-index: 1;
-            pointer-events: auto;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            z-index: 2000;
+            transition: 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+        }
+
+        .cart-drawer.open {
+            left: 0;
+        }
+
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .close-cart {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .checkout-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: auto;
+        }
+
+        .checkout-form input {
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: white;
+        }
+
+        .checkout-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .checkout-btn:hover {
+            background: #059669;
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            margin-top: 4rem;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-brand-purple selection:text-white">
+<body>
 
-    <!-- NAVIGATION HEADER -->
-    <header class="fixed top-0 left-0 right-0 z-50 glass">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            
-            <!-- Logo -->
-            <a href="#" class="flex items-center gap-3 group">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-purple to-brand-cyan flex items-center justify-center font-black text-2xl text-white shadow-lg group-hover:scale-105 transition-transform duration-300">
-                    بُـ
-                </div>
-                <div class="flex flex-col">
-                    <span class="text-2xl font-bold tracking-wider text-white group-hover:text-brand-cyan transition-colors">بُعـد <span class="text-xs text-brand-purple tracking-widest font-mono">3D</span></span>
-                    <span class="text-[10px] text-gray-400 font-light -mt-1">عالم الأصول الرقمية</span>
-                </div>
-            </a>
+    <!-- خلفية Three.js -->
+    <div id="canvas-container"></div>
 
-            <!-- Desktop Navigation Menu -->
-            <nav class="hidden md:flex items-center space-x-8 space-x-reverse text-sm font-medium">
-                <a href="#hero" class="text-white hover:text-brand-cyan transition-colors py-1 relative after:content-[''] after:absolute after:bottom-0 after:right-0 after:w-0 after:h-0.5 after:bg-brand-cyan hover:after:w-full after:transition-all">الرئيسية</a>
-                <a href="#catalog" class="text-gray-300 hover:text-brand-cyan transition-colors py-1 relative after:content-[''] after:absolute after:bottom-0 after:right-0 after:w-0 after:h-0.5 after:bg-brand-cyan hover:after:w-full after:transition-all">المنتجات</a>
-                <a href="#features" class="text-gray-300 hover:text-brand-cyan transition-colors py-1 relative after:content-[''] after:absolute after:bottom-0 after:right-0 after:w-0 after:h-0.5 after:bg-brand-cyan hover:after:w-full after:transition-all">مميزاتنا</a>
-                <a href="#contact" class="text-gray-300 hover:text-brand-cyan transition-colors py-1 relative after:content-[''] after:absolute after:bottom-0 after:right-0 after:w-0 after:h-0.5 after:bg-brand-cyan hover:after:w-full after:transition-all">اتصل بنا</a>
-            </nav>
-
-            <!-- Actions & Cart -->
-            <div class="flex items-center gap-4">
-                <button id="cart-btn" class="relative p-2.5 rounded-xl bg-brand-card hover:bg-gray-800 text-white transition-all border border-gray-800 hover:border-brand-purple group">
-                    <i class="fa-solid fa-cart-shopping text-lg text-gray-300 group-hover:text-brand-cyan transition-colors"></i>
-                    <span id="cart-count" class="absolute -top-2 -right-2 bg-gradient-to-r from-brand-purple to-pink-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-brand-dark scale-0 transition-transform duration-300">0</span>
-                </button>
-
-                <button class="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-purple to-brand-accent hover:opacity-90 transition-opacity font-semibold text-sm text-white shadow-lg shadow-brand-purple/20">
-                    <i class="fa-solid fa-user text-xs"></i>
-                    <span>تسجيل الدخول</span>
-                </button>
-
-                <!-- Mobile Menu Button -->
-                <button id="mobile-menu-btn" class="md:hidden p-2 text-gray-300 hover:text-white">
-                    <i class="fa-solid fa-bars text-xl"></i>
-                </button>
-            </div>
+    <!-- الهيدر -->
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-cube"></i> بُعد | Ba'ad
         </div>
-
-        <!-- Mobile Nav Overlay -->
-        <div id="mobile-menu" class="hidden md:hidden border-t border-gray-800 bg-brand-card/95 backdrop-blur-lg px-4 pt-2 pb-6 space-y-3">
-            <a href="#hero" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-brand-purple/20">الرئيسية</a>
-            <a href="#catalog" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-brand-purple/20">المنتجات</a>
-            <a href="#features" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-brand-purple/20">مميزاتنا</a>
-            <a href="#contact" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-brand-purple/20">اتصل بنا</a>
-        </div>
+        <ul class="nav-links">
+            <li><a href="#">الرئيسية</a></li>
+            <li><a href="#products">المنتجات</a></li>
+        </ul>
+        <button class="cart-btn" onclick="toggleCart()">
+            <i class="fa-solid fa-cart-shopping"></i> السلة (<span id="cart-count">0</span>)
+        </button>
     </header>
 
-    <!-- HERO SECTION -->
-    <section id="hero" class="relative min-h-screen pt-28 pb-16 flex items-center justify-center overflow-hidden">
-        
-        <!-- 3D Background Canvas -->
-        <div id="hero-canvas"></div>
-
-        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pointer-events-none">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-brand-purple/30 mb-8 animate-bounce pointer-events-auto">
-                <span class="flex h-2 w-2 rounded-full bg-brand-cyan animate-pulse"></span>
-                <span class="text-xs font-semibold text-brand-cyan tracking-wide">الجيل الجديد من الأصول ثلاثية الأبعاد</span>
-            </div>
-
-            <h1 class="text-4xl sm:text-6xl md:text-7xl font-black text-white tracking-tight leading-tight mb-6">
-                ابنِ عوالمك الافتراضية بأصول <br>
-                <span class="bg-gradient-to-r from-brand-cyan via-brand-purple to-pink-500 bg-clip-text text-transparent text-glow-purple">
-                    عالية الدقة والإتقان
-                </span>
-            </h1>
-
-            <p class="max-w-2xl mx-auto text-lg sm:text-xl text-gray-300 font-light mb-10 leading-relaxed">
-                سوق مصمم خصيصاً للمبدعين، المطورين، ومصممي الألعاب. اكتشف مجسمات 3D، خامات ذكية، شخصيات مجهزة، وملفات جاهزة للطباعة.
-            </p>
-
-            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center pointer-events-auto">
-                <a href="#catalog" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-brand-purple to-brand-cyan text-white font-bold text-lg hover:shadow-lg hover:shadow-brand-purple/40 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3">
-                    <span>استكشف المكتبة</span>
-                    <i class="fa-solid fa-arrow-left"></i>
-                </a>
-                <a href="#contact" class="w-full sm:w-auto px-8 py-4 rounded-xl glass hover:bg-white/10 text-white font-bold text-lg transition-all duration-300 flex items-center justify-center gap-2 border border-gray-700">
-                    <i class="fa-solid fa-cube text-brand-cyan"></i>
-                    <span>طلب تصميم خاص</span>
-                </a>
-            </div>
-
-            <!-- Stats Bar -->
-            <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto pointer-events-auto">
-                <div class="p-4 rounded-2xl glass border border-white/5">
-                    <div class="text-3xl font-bold text-brand-cyan font-mono">+5,000</div>
-                    <div class="text-xs text-gray-400 mt-1">نموذج جاهز</div>
-                </div>
-                <div class="p-4 rounded-2xl glass border border-white/5">
-                    <div class="text-3xl font-bold text-brand-purple font-mono">4K / 8K</div>
-                    <div class="text-xs text-gray-400 mt-1">دقة الخامات</div>
-                </div>
-                <div class="p-4 rounded-2xl glass border border-white/5">
-                    <div class="text-3xl font-bold text-brand-cyan font-mono">100%</div>
-                    <div class="text-xs text-gray-400 mt-1">تراخيص تجارية</div>
-                </div>
-                <div class="p-4 rounded-2xl glass border border-white/5">
-                    <div class="text-3xl font-bold text-brand-purple font-mono">+12K</div>
-                    <div class="text-xs text-gray-400 mt-1">مطور وثقوا بنا</div>
-                </div>
-            </div>
-        </div>
+    <!-- الهيرو -->
+    <section class="hero">
+        <h1>متجر <span>بُعد</span> لأصول النماذج ثلاثية الأبعاد</h1>
+        <p>اكتشف أفضل النماذج والملفات المصممة بدقة عالية لمشاريعك وإبداعاتك القادمة.</p>
+        <a href="#products" class="buy-btn" style="padding: 0.8rem 2rem; font-size: 1.1rem; text-decoration: none;">تصفح المنتجات</a>
     </section>
 
-    <!-- CATALOG SECTION -->
-    <section id="catalog" class="py-20 relative bg-brand-dark/50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <!-- Section Header -->
-            <div class="text-center max-w-3xl mx-auto mb-12">
-                <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">
-                    كتالوج <span class="text-brand-cyan">المنتجات</span>
-                </h2>
-                <p class="text-gray-400">تصفح مجموعتنا المختارة بعناية لتناسب جميع مشاريعك الرقمية والهندسية.</p>
-            </div>
-
-            <!-- Category Filter Buttons -->
-            <div class="flex flex-wrap justify-center gap-3 mb-12">
-                <button data-filter="all" class="filter-btn active px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 bg-brand-purple text-white shadow-lg shadow-brand-purple/30">
-                    الكل
-                </button>
-                <button data-filter="models" class="filter-btn px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 bg-brand-card text-gray-300 hover:text-white hover:bg-gray-800 border border-gray-800">
-                    مجسمات 3D
-                </button>
-                <button data-filter="textures" class="filter-btn px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 bg-brand-card text-gray-300 hover:text-white hover:bg-gray-800 border border-gray-800">
-                    خامات وتكسشرز
-                </button>
-                <button data-filter="characters" class="filter-btn px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 bg-brand-card text-gray-300 hover:text-white hover:bg-gray-800 border border-gray-800">
-                    شخصيات جاهزة (Rigged)
-                </button>
-                <button data-filter="printable" class="filter-btn px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 bg-brand-card text-gray-300 hover:text-white hover:bg-gray-800 border border-gray-800">
-                    قابل للطباعة (STL)
-                </button>
-            </div>
-
-            <!-- Products Grid -->
-            <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <!-- Dynamically populated via JavaScript -->
-            </div>
+    <!-- المنتجات -->
+    <div class="container" id="products">
+        <h2 class="section-title">أحدث المنتجات</h2>
+        <div class="products-grid" id="products-grid">
+            <!-- يتم جلب المنتجات ديناميكياً من Supabase -->
+            <p style="color: var(--text-muted);">جاري تحميل المنتجات...</p>
         </div>
-    </section>
+    </div>
 
-    <!-- FEATURES SECTION -->
-    <section id="features" class="py-20 relative">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">
-                    لماذا تختار <span class="text-brand-purple">منصة بُعد؟</span>
-                </h2>
-                <p class="text-gray-400">نحن نقدم جودة لا تضاهى لتسريع عملية الإنتاج لديك.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Feature 1 -->
-                <div class="glass-card p-8 rounded-2xl relative overflow-hidden group">
-                    <div class="w-14 h-14 rounded-xl bg-brand-purple/20 border border-brand-purple/40 flex items-center justify-center text-brand-purple text-2xl mb-6 group-hover:scale-110 transition-transform">
-                        <i class="fa-solid fa-bolt"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-3">تحميل فوري ومباشر</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">بمجرد إتمام الشراء، ستتمكن من تحميل أصولك بصيغ متعددة (FBX, OBJ, GLTF, STL) جاهزة للاستخدام.</p>
-                </div>
-
-                <!-- Feature 2 -->
-                <div class="glass-card p-8 rounded-2xl relative overflow-hidden group">
-                    <div class="w-14 h-14 rounded-xl bg-brand-cyan/20 border border-brand-cyan/40 flex items-center justify-center text-brand-cyan text-2xl mb-6 group-hover:scale-110 transition-transform">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-3">تراخيص تجارية مرنة</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">استخدم جميع الأصول التي تشتريها في مشاريعك التجارية، الألعاب، والأفلام بدون أي حقوق إضافية.</p>
-                </div>
-
-                <!-- Feature 3 -->
-                <div class="glass-card p-8 rounded-2xl relative overflow-hidden group">
-                    <div class="w-14 h-14 rounded-xl bg-pink-500/20 border border-pink-500/40 flex items-center justify-center text-pink-500 text-2xl mb-6 group-hover:scale-110 transition-transform">
-                        <i class="fa-solid fa-microchip"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-3">تحسين عالي للأداء</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">نماذج محسنة (Optimized Meshes) مع عدد مضلعات متوازن يضمن لك أفضل أداء محركات الألعاب مثل Unreal & Unity.</p>
-                </div>
-            </div>
+    <!-- السلة الجانبية -->
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="cart-header">
+            <h3>سلة المشتريات</h3>
+            <button class="close-cart" onclick="toggleCart()">&times;</button>
         </div>
-    </section>
-
-    <!-- CONTACT SECTION -->
-    <section id="contact" class="py-20 relative bg-brand-dark/80">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="glass-card p-8 sm:p-12 rounded-3xl border border-gray-800">
-                <div class="text-center mb-10">
-                    <h2 class="text-3xl font-extrabold text-white mb-3">تواصل مع <span class="text-brand-cyan">فريق بُعد</span></h2>
-                    <p class="text-gray-400 text-sm">هل لديك طلب خاص أو استفسار بخصوص منتجاتنا؟ أرسل لنا رسالة وسنرد عليك فوراً.</p>
-                </div>
-
-                <form id="contact-form" onsubmit="handleContactSubmit(event)" class="space-y-6">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">الاسم الكامل</label>
-                            <input type="text" required class="w-full px-4 py-3 rounded-xl bg-brand-dark/60 border border-gray-700 text-white focus:outline-none focus:border-brand-purple transition-colors" placeholder="علي أحمد">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">البريد الإلكتروني</label>
-                            <input type="email" required class="w-full px-4 py-3 rounded-xl bg-brand-dark/60 border border-gray-700 text-white focus:outline-none focus:border-brand-purple transition-colors" placeholder="name@example.com">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">موضوع الرسالة</label>
-                        <select class="w-full px-4 py-3 rounded-xl bg-brand-dark/60 border border-gray-700 text-white focus:outline-none focus:border-brand-purple transition-colors">
-                            <option>استفسار عام</option>
-                            <option>طلب مجسم 3D مخصص</option>
-                            <option>مشكلة في التحميل</option>
-                            <option>طلب شراكة</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">الرسالة</label>
-                        <textarea rows="4" required class="w-full px-4 py-3 rounded-xl bg-brand-dark/60 border border-gray-700 text-white focus:outline-none focus:border-brand-purple transition-colors" placeholder="اكتب تفاصيل استفسارك هنا..."></textarea>
-                    </div>
-
-                    <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-brand-purple to-brand-cyan font-bold text-white hover:opacity-90 transition-opacity shadow-lg shadow-brand-purple/20">
-                        إرسال الرسالة
-                    </button>
-                </form>
-            </div>
+        <div id="cart-items" style="flex-grow: 1; overflow-y: auto; margin-bottom: 1rem;">
+            <p style="color: var(--text-muted);">السلة فارغة حالياً.</p>
         </div>
-    </section>
-
-    <!-- FOOTER -->
-    <footer class="bg-brand-card/80 border-t border-gray-800 pt-12 pb-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                
-                <!-- Brand Info -->
-                <div class="space-y-4 md:col-span-1">
-                    <a href="#" class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-purple to-brand-cyan flex items-center justify-center font-bold text-white">
-                            بُـ
-                        </div>
-                        <span class="text-xl font-bold text-white">بُعـد <span class="text-xs text-brand-purple">3D</span></span>
-                    </a>
-                    <p class="text-gray-400 text-sm leading-relaxed">المنصة العربية الأولى المتخصصة في تزويد المصممين والمطورين بأفضل الأصول ثلاثية الأبعاد الاحترافية.</p>
-                </div>
-
-                <!-- Quick Links -->
-                <div>
-                    <h4 class="text-white font-bold mb-4 text-sm">روابط سريعة</h4>
-                    <ul class="space-y-2 text-sm text-gray-400">
-                        <li><a href="#hero" class="hover:text-brand-cyan transition-colors">الرئيسية</a></li>
-                        <li><a href="#catalog" class="hover:text-brand-cyan transition-colors">متجر الأصول</a></li>
-                        <li><a href="#features" class="hover:text-brand-cyan transition-colors">عن بُعد</a></li>
-                        <li><a href="#contact" class="hover:text-brand-cyan transition-colors">الدعم الفني</a></li>
-                    </ul>
-                </div>
-
-                <!-- Categories -->
-                <div>
-                    <h4 class="text-white font-bold mb-4 text-sm">التصنيفات</h4>
-                    <ul class="space-y-2 text-sm text-gray-400">
-                        <li><a href="#catalog" class="hover:text-brand-cyan transition-colors">مجسمات معماري</a></li>
-                        <li><a href="#catalog" class="hover:text-brand-cyan transition-colors">شخصيات ألعاب</a></li>
-                        <li><a href="#catalog" class="hover:text-brand-cyan transition-colors">ملفات STL للطباعة</a></li>
-                        <li><a href="#catalog" class="hover:text-brand-cyan transition-colors">خامات 8K PBR</a></li>
-                    </ul>
-                </div>
-
-                <!-- Social -->
-                <div>
-                    <h4 class="text-white font-bold mb-4 text-sm">تابعنا على</h4>
-                    <div class="flex gap-3">
-                        <a href="#" class="w-10 h-10 rounded-xl bg-brand-dark flex items-center justify-center text-gray-400 hover:text-brand-cyan hover:border-brand-cyan border border-gray-800 transition-colors">
-                            <i class="fa-brands font-xs fa-twitter"></i>
-                        </a>
-                        <a href="#" class="w-10 h-10 rounded-xl bg-brand-dark flex items-center justify-center text-gray-400 hover:text-brand-purple hover:border-brand-purple border border-gray-800 transition-colors">
-                            <i class="fa-brands font-xs fa-instagram"></i>
-                        </a>
-                        <a href="#" class="w-10 h-10 rounded-xl bg-brand-dark flex items-center justify-center text-gray-400 hover:text-brand-cyan hover:border-brand-cyan border border-gray-800 transition-colors">
-                            <i class="fa-brands font-xs fa-discord"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="border-t border-gray-800/60 pt-6 text-center text-xs text-gray-500">
-                جميع الحقوق محفوظة © <span id="year"></span> متجر بُعد 3D (Ba'ad Store)
-            </div>
+        <div class="checkout-form">
+            <input type="text" id="customerName" placeholder="اسمك الكامل" required>
+            <input type="text" id="customerPhone" placeholder="رقم الهاتف للتواصل" required>
+            <button class="checkout-btn" onclick="checkout()">إتمام الطلب الآن</button>
         </div>
+    </div>
+
+    <footer>
+        <p>جميع الحقوق محفوظة لمتجر بُعد &copy; 2026</p>
     </footer>
 
-    <!-- PRODUCT PREVIEW MODAL -->
-    <div id="product-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-        <div class="glass-card max-w-3xl w-full rounded-3xl overflow-hidden border border-gray-700 relative flex flex-col md:flex-row">
-            <!-- Close Button -->
-            <button onclick="closeModal()" class="absolute top-4 left-4 z-10 w-10 h-10 rounded-full bg-brand-dark/80 text-gray-300 hover:text-white flex items-center justify-center border border-gray-700">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-            <!-- Preview Image / Visual -->
-            <div class="md:w-1/2 bg-brand-dark/90 p-8 flex items-center justify-center border-b md:border-b-0 md:border-l border-gray-800 relative">
-                <img id="modal-img" src="" alt="" class="max-h-64 object-contain rounded-xl">
-                <span id="modal-badge" class="absolute top-4 right-4 text-xs font-bold px-3 py-1 rounded-full bg-brand-purple/20 text-brand-purple border border-brand-purple/30">
-                    3D Model
-                </span>
-            </div>
-
-            <!-- Content Info -->
-            <div class="md:w-1/2 p-6 sm:p-8 flex flex-col justify-between">
-                <div>
-                    <h3 id="modal-title" class="text-2xl font-bold text-white mb-2">عنوان المنتج</h3>
-                    <div id="modal-price" class="text-xl font-extrabold text-brand-cyan mb-4">$0.00</div>
-                    <p id="modal-desc" class="text-gray-300 text-sm mb-6 leading-relaxed">وصف مفصل للمنتج والأصول المرفقة معه.</p>
-
-                    <div class="space-y-2 mb-6">
-                        <div class="flex justify-between text-xs text-gray-400">
-                            <span>الصيغة (Formats):</span>
-                            <span id="modal-formats" class="text-white font-mono">FBX, OBJ, BLEND</span>
-                        </div>
-                        <div class="flex justify-between text-xs text-gray-400">
-                            <span>حجم الملف:</span>
-                            <span id="modal-size" class="text-white font-mono">45 MB</span>
-                        </div>
-                        <div class="flex justify-between text-xs text-gray-400">
-                            <span>عدد المضلعات (Polygons):</span>
-                            <span id="modal-poly" class="text-white font-mono">12,400</span>
-                        </div>
-                    </div>
-                </div>
-
-                <button id="modal-add-btn" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-purple to-brand-cyan text-white font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-cart-plus"></i>
-                    <span>إضافة إلى السلة</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- CART DRAWER -->
-    <div id="cart-drawer" class="fixed inset-y-0 left-0 z-50 w-full max-w-md bg-brand-card/95 backdrop-blur-xl border-r border-gray-800 transform -translate-x-full transition-transform duration-300 flex flex-col justify-between">
-        <!-- Header -->
-        <div class="p-6 border-b border-gray-800 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <i class="fa-solid fa-bag-shopping text-brand-cyan text-xl"></i>
-                <h3 class="text-lg font-bold text-white">سلة التسوق</h3>
-            </div>
-            <button id="close-cart" class="text-gray-400 hover:text-white">
-                <i class="fa-solid fa-xmark text-xl"></i>
-            </button>
-        </div>
-
-        <!-- Cart Items List -->
-        <div id="cart-items" class="p-6 overflow-y-auto flex-1 space-y-4">
-            <!-- Items rendered via JS -->
-        </div>
-
-        <!-- Footer / Checkout -->
-        <div class="p-6 border-t border-gray-800 bg-brand-dark/50 space-y-4">
-            <div class="flex justify-between text-gray-300 font-semibold">
-                <span>المجموع الكلي:</span>
-                <span id="cart-total" class="text-brand-cyan font-mono text-xl">$0.00</span>
-            </div>
-            <button onclick="checkout()" class="w-full py-4 rounded-xl bg-gradient-to-r from-brand-purple to-brand-cyan font-bold text-white hover:opacity-90 transition-opacity text-center flex items-center justify-center gap-2">
-                <i class="fa-solid fa-credit-card"></i>
-                <span>متابعة الشراء</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- NOTIFICATION TOAST -->
-    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 glass px-6 py-4 rounded-2xl border border-brand-purple flex items-center gap-3 text-white shadow-2xl">
-        <i class="fa-solid fa-circle-check text-brand-cyan text-xl"></i>
-        <span id="toast-msg">تمت العملية بنجاح!</span>
-    </div>
-
-    <!-- JAVASCRIPT CODE -->
     <script>
-        // Set copyright year
-        document.getElementById('year').innerText = new Date().getFullYear();
-
-        // Sample Product Data
-        const products = [
-            {
-                id: 1,
-                name: "خوذة سايبربنك مستقبلية",
-                category: "models",
-                categoryName: "مجسمات 3D",
-                price: 29.99,
-                img: "https://placehold.co/400x300/151828/8B5CF6?text=Cyberpunk+Helmet",
-                desc: "نموذج خوذة عالية التفاصيل بدقة عالية، مقسمة وقابلة للتعديل بسهولة داخل Maya أو Blender.",
-                formats: "FBX, OBJ, BLEND",
-                size: "68 MB",
-                polygons: "18,500"
-            },
-            {
-                id: 2,
-                name: "حزمة خامات الخرسانة والحديد",
-                category: "textures",
-                categoryName: "خامات وتكسشرز",
-                price: 19.99,
-                img: "https://placehold.co/400x300/151828/06B6D4?text=Concrete+PBR+Textures",
-                desc: "مجموعة خامات PBR فائقة الدقة (8K) للخرسانة والمعادن الصدئة، تشمل خرائط Albedo, Normal, Roughness.",
-                formats: "PNG, JPG, SBSAR",
-                size: "1.2 GB",
-                polygons: "N/A"
-            },
-            {
-                id: 3,
-                name: "روبوت مقاتل مجهز للحركة (Rigged)",
-                category: "characters",
-                categoryName: "شخصيات جاهزة",
-                price: 49.99,
-                img: "https://placehold.co/400x300/151828/8B5CF6?text=Mecha+Robot+Rigged",
-                desc: "شخصية روبوت ذو طابع مستقبلي مجهزة بهيكل عظمي كامل (IK/FK Rig) ومتوافقة مع Unreal Engine 5.",
-                formats: "FBX, BLEND, Unreal Asset",
-                size: "240 MB",
-                polygons: "45,000"
-            },
-            {
-                id: 4,
-                name: "تمثال عربي مزخرف قابل للطباعة",
-                category: "printable",
-                categoryName: "قابل للطباعة",
-                price: 14.99,
-                img: "https://placehold.co/400x300/151828/06B6D4?text=Arabic+Statue+STL",
-                desc: "نموذج 3D عالي الدقة جاهز مباشرة للطباعة ثلاثية الأبعاد (3D Printing)، بدون أي مشاكل في الميش.",
-                formats: "STL, OBJ",
-                size: "85 MB",
-                polygons: "320,000"
-            },
-            {
-                id: 5,
-                name: "سيارة رياضية غريبة (Sci-Fi Car)",
-                category: "models",
-                categoryName: "مجسمات 3D",
-                price: 39.99,
-                img: "https://placehold.co/400x300/151828/8B5CF6?text=Sci-Fi+Vehicle",
-                desc: "سيارة مستقبليات فائقة الجودة بتفاصيل إضاءة نيون داخلية وخارجية وخامات كاملة.",
-                formats: "FBX, OBJ, C4D",
-                size: "150 MB",
-                polygons: "82,000"
-            },
-            {
-                id: 6,
-                name: "خامات أحجار وكواكب فضائية",
-                category: "textures",
-                categoryName: "خامات وتكسشرز",
-                price: 24.99,
-                img: "https://placehold.co/400x300/151828/06B6D4?text=Sci-Fi+Planet+Textures",
-                desc: "مجموعة خامات لخلق كواكب وعوالم فضائية مخصصة لمصممي العروض والمؤثرات البصرية.",
-                formats: "EXR, PNG",
-                size: "800 MB",
-                polygons: "N/A"
-            }
-        ];
+        // إعدادات الاتصال بـ Supabase (تم ربطها بنجاح)
+        const SUPABASE_URL = 'https://lrtliudkfracubpkbuhm.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'sb_publishable_-HEpvKoPL40CxNyDDQCE8A_tvVmIpTR';
+        
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let cart = [];
 
-        // Render Products Grid
-        function renderProducts(filter = 'all') {
+        // جلب المنتجات من Supabase وعرضها
+        async function fetchProducts() {
             const grid = document.getElementById('products-grid');
+            const { data, error } = await _supabase.from('products').select('*');
+            
+            if (error) {
+                grid.innerHTML = '<p style="color: red;">خطأ في تحميل المنتجات تأكد من الاتصال.</p>';
+                console.error(error);
+                return;
+            }
+
+            if (data.length === 0) {
+                grid.innerHTML = '<p style="color: var(--text-muted);">لا توجد منتجات مضافة حالياً في لوحة تحكم Supabase.</p>';
+                return;
+            }
+
             grid.innerHTML = '';
-
-            const filtered = filter === 'all' ? products : products.filter(p => p.category === filter);
-
-            filtered.forEach(p => {
-                const card = document.createElement('div');
-                card.className = 'glass-card rounded-2xl overflow-hidden flex flex-col justify-between group';
-                card.innerHTML = `
-                    <div>
-                        <div class="relative overflow-hidden bg-brand-dark/60 h-48 flex items-center justify-center p-4">
-                            <img src="${p.img}" alt="${p.name}" class="max-h-full object-contain group-hover:scale-110 transition-transform duration-500">
-                            <span class="absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full bg-brand-dark/80 text-brand-cyan border border-brand-cyan/20">
-                                ${p.categoryName}
-                            </span>
-                        </div>
-                        <div class="p-5">
-                            <h3 class="text-lg font-bold text-white mb-2 group-hover:text-brand-purple transition-colors">${p.name}</h3>
-                            <p class="text-gray-400 text-xs line-clamp-2 mb-4 leading-relaxed">${p.desc}</p>
-                        </div>
-                    </div>
-                    <div class="p-5 pt-0 flex items-center justify-between border-t border-gray-800/50 mt-auto">
-                        <span class="text-lg font-extrabold text-white font-mono">$${p.price.toFixed(2)}</span>
-                        <div class="flex gap-2">
-                            <button onclick="openModal(${p.id})" class="p-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white transition-colors">
-                                <i class="fa-regular fa-eye"></i>
-                            </button>
-                            <button onclick="addToCart(${p.id})" class="px-4 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple/80 text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-md shadow-brand-purple/20">
-                                <i class="fa-solid fa-cart-plus"></i>
-                                <span>إضافة</span>
-                            </button>
+            data.forEach(product => {
+                grid.innerHTML += `
+                    <div class="product-card">
+                        <img src="${product.image || 'https://via.placeholder.com/300'}" class="product-img" alt="${product.name}">
+                        <div class="product-content">
+                            <div>
+                                <h3 class="product-title">${product.name}</h3>
+                                <p class="product-desc">${product.description || 'بدون وصف'}</p>
+                            </div>
+                            <div class="product-footer">
+                                <span class="product-price">${product.price} ج.م</span>
+                                <button class="buy-btn" onclick="addToCart('${product.name}', ${product.price})">أضف للسلة</button>
+                            </div>
                         </div>
                     </div>
                 `;
-                grid.appendChild(card);
             });
         }
 
-        // Filter Logic
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.filter-btn').forEach(b => {
-                    b.classList.remove('bg-brand-purple', 'text-white', 'shadow-lg');
-                    b.classList.add('bg-brand-card', 'text-gray-300');
-                });
-                e.target.classList.remove('bg-brand-card', 'text-gray-300');
-                e.target.classList.add('bg-brand-purple', 'text-white', 'shadow-lg');
-                
-                renderProducts(e.target.getAttribute('data-filter'));
-            });
-        });
-
-        // Modal Logic
-        let activeModalProduct = null;
-        function openModal(id) {
-            const product = products.find(p => p.id === id);
-            if (!product) return;
-            activeModalProduct = product;
-
-            document.getElementById('modal-img').src = product.img;
-            document.getElementById('modal-title').innerText = product.name;
-            document.getElementById('modal-price').innerText = `$${product.price.toFixed(2)}`;
-            document.getElementById('modal-desc').innerText = product.desc;
-            document.getElementById('modal-badge').innerText = product.categoryName;
-            document.getElementById('modal-formats').innerText = product.formats;
-            document.getElementById('modal-size').innerText = product.size;
-            document.getElementById('modal-poly').innerText = product.polygons;
-
-            document.getElementById('modal-add-btn').onclick = () => {
-                addToCart(product.id);
-                closeModal();
-            };
-
-            document.getElementById('product-modal').classList.remove('hidden');
+        function toggleCart() {
+            document.getElementById('cartDrawer').classList.toggle('open');
         }
 
-        function closeModal() {
-            document.getElementById('product-modal').classList.add('hidden');
-        }
-
-        // Cart Drawer Logic
-        const cartBtn = document.getElementById('cart-btn');
-        const closeCart = document.getElementById('close-cart');
-        const cartDrawer = document.getElementById('cart-drawer');
-
-        cartBtn.addEventListener('click', () => {
-            cartDrawer.classList.remove('-translate-x-full');
-        });
-
-        closeCart.addEventListener('click', () => {
-            cartDrawer.classList.add('-translate-x-full');
-        });
-
-        function addToCart(id) {
-            const item = products.find(p => p.id === id);
-            if (item) {
-                cart.push(item);
-                updateCartUI();
-                showToast(`تم إضافة "${item.name}" إلى السلة`);
-            }
-        }
-
-        function removeFromCart(index) {
-            cart.splice(index, 1);
+        function addToCart(name, price) {
+            cart.push({ name, price });
+            document.getElementById('cart-count').innerText = cart.length;
             updateCartUI();
+            toggleCart();
         }
 
         function updateCartUI() {
-            const cartCount = document.getElementById('cart-count');
-            const cartItems = document.getElementById('cart-items');
-            const cartTotal = document.getElementById('cart-total');
-
-            cartCount.innerText = cart.length;
-            if (cart.length > 0) {
-                cartCount.classList.remove('scale-0');
-            } else {
-                cartCount.classList.add('scale-0');
-            }
-
-            cartItems.innerHTML = '';
-            let total = 0;
-
-            if(cart.length === 0) {
-                cartItems.innerHTML = `<div class="text-center text-gray-500 py-12">السلة فارغة حالياً</div>`;
-            } else {
-                cart.forEach((item, idx) => {
-                    total += item.price;
-                    const el = document.createElement('div');
-                    el.className = 'flex items-center justify-between p-3 rounded-xl bg-brand-dark/50 border border-gray-800';
-                    el.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            <img src="${item.img}" class="w-12 h-12 rounded-lg object-cover">
-                            <div>
-                                <h4 class="text-xs font-bold text-white">${item.name}</h4>
-                                <span class="text-xs font-mono text-brand-cyan">$${item.price.toFixed(2)}</span>
-                            </div>
-                        </div>
-                        <button onclick="removeFromCart(${idx})" class="text-gray-500 hover:text-red-400 p-1">
-                            <i class="fa-solid fa-trash-can text-sm"></i>
-                        </button>
-                    `;
-                    cartItems.appendChild(el);
-                });
-            }
-
-            cartTotal.innerText = `$${total.toFixed(2)}`;
-        }
-
-        function checkout() {
+            const container = document.getElementById('cart-items');
             if (cart.length === 0) {
-                showToast('السلة فارغة لا يمكن إتمام الشراء');
+                container.innerHTML = '<p style="color: var(--text-muted);">السلة فارغة حالياً.</p>';
                 return;
             }
-            showToast('سيتم توجيهك لبوابة الدفع الإلكتروني...');
-            cart = [];
-            updateCartUI();
-            cartDrawer.classList.add('-translate-x-full');
+            container.innerHTML = '';
+            cart.forEach((item, index) => {
+                container.innerHTML += `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
+                        <span>${item.name}</span>
+                        <span><b>${item.price} ج.م</b></span>
+                    </div>
+                `;
+            });
         }
 
-        // Toast Notification
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
+        // إرسال الطلب لجدول orders في Supabase
+        async function checkout() {
+            const name = document.getElementById('customerName').value;
+            const phone = document.getElementById('customerPhone').value;
+
+            if (!name || !phone) {
+                alert('الرجاء إدخال الاسم ورقم الهاتف!');
+                return;
+            }
+
+            if (cart.length === 0) {
+                alert('سلة المشتريات فارغة!');
+                return;
+            }
+
+            const productNames = cart.map(item => item.name).join(' + ');
+
+            const { error } = await _supabase.from('orders').insert([
+                { customer_name: name, customer_phone: phone, product_name: productNames }
+            ]);
+
+            if (error) {
+                alert('حدث خطأ أثناء إتمام الطلب، حاول مرة أخرى.');
+                console.error(error);
+            } else {
+                alert('تم إتمام طلبك بنجاح! سنتواصل معك قريباً.');
+                cart = [];
+                document.getElementById('cart-count').innerText = 0;
+                document.getElementById('customerName').value = '';
+                document.getElementById('customerPhone').value = '';
+                updateCartUI();
+                toggleCart();
+            }
         }
 
-        // Mobile Navigation Toggle
-        const mobileBtn = document.getElementById('mobile-menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
+        // تشغيل كود جلب المنتجات عند فتح الصفحة
+        fetchProducts();
 
-        mobileBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
+        // خلفية Three.js المكعبات المتحركة
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+        const material = new THREE.MeshBasicMaterial({ color: 0x8b5cf6, wireframe: true });
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+
+        camera.position.z = 5;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            cube.rotation.x += 0.005;
+            cube.rotation.y += 0.005;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         });
-
-        // Contact Form Handling
-        function handleContactSubmit(e) {
-            e.preventDefault();
-            showToast('شكراً لتواصلك معنا! سيتواصل معك الفريق قريباً.');
-            e.target.reset();
-        }
-
-        // --- THREE.JS INTERACTIVE 3D BACKGROUND ---
-        window.onload = function() {
-            renderProducts('all');
-
-            const container = document.getElementById('hero-canvas');
-            const scene = new THREE.Scene();
-
-            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-            camera.position.z = 5;
-
-            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            container.appendChild(renderer.domElement);
-
-            // Create Main Holographic Cube
-            const geometry = new THREE.BoxGeometry(2, 2, 2);
-            const material = new THREE.MeshStandardMaterial({
-                color: 0x8B5CF6,
-                wireframe: true,
-                emissive: 0x06B6D4,
-                emissiveIntensity: 0.5
-            });
-            const cube = new THREE.Mesh(geometry, material);
-            scene.add(cube);
-
-            // Particles Array
-            const particlesGeo = new THREE.BufferGeometry();
-            const count = 300;
-            const posArray = new Float32Array(count * 3);
-
-            for (let i = 0; i < count * 3; i++) {
-                posArray[i] = (Math.random() - 0.5) * 12;
-            }
-
-            particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-            const particlesMat = new THREE.PointsMaterial({
-                size: 0.03,
-                color: 0x06B6D4,
-                transparent: true,
-                opacity: 0.8
-            });
-
-            const particlesMesh = new THREE.Points(particlesGeo, particlesMat);
-            scene.add(particlesMesh);
-
-            // Lighting
-            const pointLight = new THREE.PointLight(0x8B5CF6, 2);
-            pointLight.position.set(2, 3, 4);
-            scene.add(pointLight);
-
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-            scene.add(ambientLight);
-
-            // Mouse interaction
-            let mouseX = 0;
-            let mouseY = 0;
-
-            document.addEventListener('mousemove', (e) => {
-                mouseX = (e.clientX / window.innerWidth) - 0.5;
-                mouseY = (e.clientY / window.innerHeight) - 0.5;
-            });
-
-            // Animation Loop
-            function animate() {
-                requestAnimationFrame(animate);
-
-                cube.rotation.x += 0.005;
-                cube.rotation.y += 0.008;
-
-                // Subtle responsiveness to mouse
-                cube.rotation.y += mouseX * 0.05;
-                cube.rotation.x += mouseY * 0.05;
-
-                particlesMesh.rotation.y -= 0.002;
-
-                renderer.render(scene, camera);
-            }
-
-            animate();
-
-            // Window Resize Listener
-            window.addEventListener('resize', () => {
-                camera.aspect = container.clientWidth / container.clientHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(container.clientWidth, container.clientHeight);
-            });
-        };
     </script>
 </body>
 </html>
