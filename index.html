@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر بُعد | عالم الـ 3D</title>
+    <title>متجر بُعد | عالم الـ 3D والطباعة المجسمة في مصر</title>
     <!-- خط Cairo -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <!-- FontAwesome للأيقونات -->
@@ -15,14 +15,14 @@
 
     <style>
         :root {
-            --bg-primary: #0b0f19;
-            --bg-secondary: #131b2e;
-            --accent-purple: #8b5cf6;
+            --bg-primary: #070913;
+            --bg-secondary: #0f172a;
+            --accent-purple: #7c3aed;
             --accent-cyan: #06b6d4;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --card-bg: rgba(19, 27, 46, 0.7);
-            --border-color: rgba(139, 92, 246, 0.2);
+            --card-bg: rgba(15, 23, 42, 0.75);
+            --border-color: rgba(6, 182, 212, 0.2);
         }
 
         * {
@@ -40,7 +40,6 @@
             position: relative;
         }
 
-        /* خلفية Three.js */
         #canvas-container {
             position: fixed;
             top: 0;
@@ -51,14 +50,13 @@
             pointer-events: none;
         }
 
-        /* الهيدر وشريط التنقل */
         header {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            background: rgba(11, 15, 25, 0.85);
-            backdrop-filter: blur(12px);
+            background: rgba(7, 9, 19, 0.9);
+            backdrop-filter: blur(15px);
             border-bottom: 1px solid var(--border-color);
             z-index: 1000;
             display: flex;
@@ -100,6 +98,7 @@
             background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
             color: white;
             border: none;
+            padding: 0.6jl;
             padding: 0.6rem 1.2rem;
             border-radius: 50px;
             font-weight: 700;
@@ -107,7 +106,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
             transition: 0.3s;
         }
 
@@ -115,9 +114,8 @@
             transform: scale(1.05);
         }
 
-        /* قسم الهيرو (الواجهة) */
         .hero {
-            height: 80vh;
+            height: 85vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -128,9 +126,9 @@
         }
 
         .hero h1 {
-            font-size: 3.5rem;
+            font-size: 3.8rem;
             font-weight: 900;
-            margin-bottom: 1rem;
+            margin-bottom: 1.2rem;
             line-height: 1.2;
         }
 
@@ -139,13 +137,13 @@
         }
 
         .hero p {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             color: var(--text-muted);
-            max-width: 600px;
-            margin-bottom: 2rem;
+            max-width: 650px;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
         }
 
-        /* حاوية المنتجات */
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -153,10 +151,11 @@
         }
 
         .section-title {
-            font-size: 2rem;
+            font-size: 2.2rem;
             margin-bottom: 2rem;
             border-right: 4px solid var(--accent-cyan);
             padding-right: 15px;
+            font-weight: 800;
         }
 
         .products-grid {
@@ -179,12 +178,12 @@
         .product-card:hover {
             transform: translateY(-8px);
             border-color: var(--accent-cyan);
-            box-shadow: 0 10px 30px rgba(6, 182, 212, 0.15);
+            box-shadow: 0 15px 35px rgba(6, 182, 212, 0.2);
         }
 
         .product-img {
             width: 100%;
-            height: 200px;
+            height: 220px;
             object-fit: cover;
             background: #1e293b;
         }
@@ -198,15 +197,16 @@
         }
 
         .product-title {
-            font-size: 1.25rem;
+            font-size: 1.3rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
         }
 
         .product-desc {
             color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
+            font-size: 0.95rem;
+            margin-bottom: 1.2rem;
+            line-height: 1.5;
         }
 
         .product-footer {
@@ -216,7 +216,7 @@
         }
 
         .product-price {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             font-weight: 900;
             color: var(--accent-cyan);
         }
@@ -225,15 +225,81 @@
             background: var(--accent-purple);
             color: white;
             border: none;
-            padding: 0.5rem 1rem;
+            padding: 0.6rem 1.2rem;
             border-radius: 8px;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 700;
             transition: 0.2s;
         }
 
         .buy-btn:hover {
-            background: #7c3aed;
+            background: #6d28d9;
+        }
+
+        /* نافذة طلب كلمة السر السريّة */
+        .password-modal, .admin-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .admin-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 15px 50px rgba(6, 182, 212, 0.3);
+            position: relative;
+        }
+
+        .admin-card h2 {
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: var(--accent-cyan);
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .form-group input, .form-group textarea {
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: white;
+            font-size: 1rem;
+        }
+
+        .close-admin {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
         }
 
         /* السلة الجانبية */
@@ -309,15 +375,25 @@
             color: var(--text-muted);
             border-top: 1px solid var(--border-color);
             margin-top: 4rem;
+            font-size: 0.95rem;
+        }
+        
+        /* مكان سري تماماً في الفوتر للضغط المطول أو النقر المزدوج */
+        .secret-trigger {
+            cursor: pointer;
+            user-select: none;
+            display: inline-block;
+            transition: 0.3s;
+        }
+        .secret-trigger:hover {
+            color: var(--accent-cyan);
         }
     </style>
 </head>
 <body>
 
-    <!-- خلفية Three.js -->
     <div id="canvas-container"></div>
 
-    <!-- الهيدر -->
     <header>
         <div class="logo">
             <i class="fa-solid fa-cube"></i> بُعد | Ba'ad
@@ -331,18 +407,15 @@
         </button>
     </header>
 
-    <!-- الهيرو -->
     <section class="hero">
-        <h1>متجر <span>بُعد</span> لأصول النماذج ثلاثية الأبعاد</h1>
-        <p>اكتشف أفضل النماذج والملفات المصممة بدقة عالية لمشاريعك وإبداعاتك القادمة.</p>
-        <a href="#products" class="buy-btn" style="padding: 0.8rem 2rem; font-size: 1.1rem; text-decoration: none;">تصفح المنتجات</a>
+        <h1>متجر <span>بُعد</span> | عالم الـ 3D والطباعة المجسمة</h1>
+        <p>إحنا بندّي لأفكارك أبعاد حقيقية. تصميمات ومجسمات ثلاثية الأبعاد بدقة فائقة، ومفروشات وإضاءات وأصول فنية تليق بمشروعك وإبداعك في مصر.</p>
+        <a href="#products" class="buy-btn" style="padding: 0.9rem 2.5rem; font-size: 1.15rem; text-decoration: none;">تصفح المنتجات الآن</a>
     </section>
 
-    <!-- المنتجات -->
     <div class="container" id="products">
-        <h2 class="section-title">أحدث المنتجات</h2>
+        <h2 class="section-title">أحدث الابتكارات والمجسمات</h2>
         <div class="products-grid" id="products-grid">
-            <!-- يتم جلب المنتجات ديناميكياً من Supabase -->
             <p style="color: var(--text-muted);">جاري تحميل المنتجات...</p>
         </div>
     </div>
@@ -358,17 +431,54 @@
         </div>
         <div class="checkout-form">
             <input type="text" id="customerName" placeholder="اسمك الكامل" required>
-            <input type="text" id="customerPhone" placeholder="رقم الهاتف للتواصل" required>
-            <button class="checkout-btn" onclick="checkout()">إتمام الطلب الآن</button>
+            <input type="text" id="customerPhone" placeholder="رقم الموبايل للتواصل" required>
+            <button class="checkout-btn" onclick="checkout()">إتمام الطلب</button>
+        </div>
+    </div>
+
+    <!-- نافذة إدخال كلمة السر السرية -->
+    <div class="password-modal" id="passwordModal">
+        <div class="admin-card">
+            <button class="close-admin" onclick="closePasswordModal()">&times;</button>
+            <h2>منطقة الإدارة السرية</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem; text-align: center;">اكتب كلمة السر للمتابعة</p>
+            <div class="form-group">
+                <input type="password" id="secretInputPass" placeholder="اكتب كلمة السر هنا...">
+            </div>
+            <button class="buy-btn" style="width: 100%; padding: 0.8rem;" onclick="checkSecretPassword()">دخول لوحة التحكم</button>
+        </div>
+    </div>
+
+    <!-- لوحة التحكم الحقيقية لإضافة المنتجات -->
+    <div class="admin-modal" id="adminModal">
+        <div class="admin-card">
+            <button class="close-admin" onclick="toggleAdminModal()">&times;</button>
+            <h2>إضافة منتج جديد لـ "بُعد"</h2>
+            <div class="form-group">
+                <label>اسم المنتج</label>
+                <input type="text" id="prodName" placeholder="مثال: مجسم هرمي عالي الدقة">
+            </div>
+            <div class="form-group">
+                <label>السعر (بالجنيه المصري)</label>
+                <input type="number" id="prodPrice" placeholder="مثال: 250">
+            </div>
+            <div class="form-group">
+                <label>الوصف</label>
+                <textarea id="prodDesc" rows="3" placeholder="وصف تفصيلي للخامات والمقاسات..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>صورة المنتج (من استوديو الموبايل)</label>
+                <input type="file" id="prodImage" accept="image/*">
+            </div>
+            <button class="buy-btn" style="width: 100%; padding: 0.9rem; margin-top: 1rem;" onclick="uploadProduct()">نشر المنتج للمتجر فوراً</button>
         </div>
     </div>
 
     <footer>
-        <p>جميع الحقوق محفوظة لمتجر بُعد &copy; 2026</p>
+        <p>جميع الحقوق محفوظة لمتجر <span class="secret-trigger" id="secretTrigger" title="اضغط هنا مرتين لفتح لوحة التحكم">بُعد &copy; 2026</span></p>
     </footer>
 
     <script>
-        // إعدادات الاتصال بـ Supabase (تم ربطها بنجاح)
         const SUPABASE_URL = 'https://lrtliudkfracubpkbuhm.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_-HEpvKoPL40CxNyDDQCE8A_tvVmIpTR';
         
@@ -377,19 +487,42 @@
 
         let cart = [];
 
-        // جلب المنتجات من Supabase وعرضها
+        // خدعة النقر المزدوج في الفوتر لكتابة كلمة السر
+        document.getElementById('secretTrigger').addEventListener('dblclick', () => {
+            document.getElementById('passwordModal').style.display = 'flex';
+            document.getElementById('secretInputPass').value = '';
+        });
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').style.display = 'none';
+        }
+
+        function checkSecretPassword() {
+            const val = document.getElementById('secretInputPass').value;
+            if (val === 'moabdoelal') {
+                closePasswordModal();
+                toggleAdminModal();
+            } else {
+                alert('كلمة السر غير صحيحة!');
+            }
+        }
+
+        function toggleAdminModal() {
+            const modal = document.getElementById('adminModal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+        }
+
         async function fetchProducts() {
             const grid = document.getElementById('products-grid');
             const { data, error } = await _supabase.from('products').select('*');
             
             if (error) {
-                grid.innerHTML = '<p style="color: red;">خطأ في تحميل المنتجات تأكد من الاتصال.</p>';
-                console.error(error);
+                grid.innerHTML = '<p style="color: red;">خطأ في تحميل المنتجات.</p>';
                 return;
             }
 
             if (data.length === 0) {
-                grid.innerHTML = '<p style="color: var(--text-muted);">لا توجد منتجات مضافة حالياً في لوحة تحكم Supabase.</p>';
+                grid.innerHTML = '<p style="color: var(--text-muted);">لا توجد منتجات مضافة حالياً في المتجر.</p>';
                 return;
             }
 
@@ -413,6 +546,56 @@
             });
         }
 
+        async function uploadProduct() {
+            const name = document.getElementById('prodName').value;
+            const price = document.getElementById('prodPrice').value;
+            const description = document.getElementById('prodDesc').value;
+            const imageFile = document.getElementById('prodImage').files[0];
+
+            if (!name || !price || !imageFile) {
+                alert('الرجاء إدخال اسم المنتج، السعر، واختيار صورة من التليفون!');
+                return;
+            }
+
+            alert('جاري رفع الصورة للمتجر وإضافة المنتج...');
+
+            try {
+                const fileExt = imageFile.name.split('.').pop();
+                const fileName = `${Date.now()}.${fileExt}`;
+
+                const { error: uploadError } = await _supabase.storage
+                    .from('products-images')
+                    .upload(fileName, imageFile);
+
+                if (uploadError) throw uploadError;
+
+                const { data: urlData } = _supabase.storage
+                    .from('products-images')
+                    .getPublicUrl(fileName);
+
+                const imageUrl = urlData.publicUrl;
+
+                const { error: dbError } = await _supabase.from('products').insert([
+                    { name: name, price: parseFloat(price), description: description, image: imageUrl }
+                ]);
+
+                if (dbError) throw dbError;
+
+                alert('تم إضافة المنتج بنجاح وبقى ظاهر في الموقع للكل!');
+                toggleAdminModal();
+                fetchProducts();
+
+                document.getElementById('prodName').value = '';
+                document.getElementById('prodPrice').value = '';
+                document.getElementById('prodDesc').value = '';
+                document.getElementById('prodImage').value = '';
+
+            } catch (error) {
+                console.error(error);
+                alert('حدث خطأ. تأكد من إعدادات سوبابيس (Bucket: products-images).');
+            }
+        }
+
         function toggleCart() {
             document.getElementById('cartDrawer').classList.toggle('open');
         }
@@ -431,7 +614,7 @@
                 return;
             }
             container.innerHTML = '';
-            cart.forEach((item, index) => {
+            cart.forEach((item) => {
                 container.innerHTML += `
                     <div style="display: flex; justify-content: space-between; margin-bottom: 10px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
                         <span>${item.name}</span>
@@ -441,13 +624,12 @@
             });
         }
 
-        // إرسال الطلب لجدول orders في Supabase
         async function checkout() {
             const name = document.getElementById('customerName').value;
             const phone = document.getElementById('customerPhone').value;
 
             if (!name || !phone) {
-                alert('الرجاء إدخال الاسم ورقم الهاتف!');
+                alert('الرجاء إدخال الاسم ورقم الموبايل!');
                 return;
             }
 
@@ -463,10 +645,9 @@
             ]);
 
             if (error) {
-                alert('حدث خطأ أثناء إتمام الطلب، حاول مرة أخرى.');
-                console.error(error);
+                alert('حدث خطأ أثناء إتمام الطلب.');
             } else {
-                alert('تم إتمام طلبك بنجاح! سنتواصل معك قريباً.');
+                alert('تم إتمام طلبك بنجاح! هنتواصل معاك في أسرع وقت.');
                 cart = [];
                 document.getElementById('cart-count').innerText = 0;
                 document.getElementById('customerName').value = '';
@@ -476,10 +657,9 @@
             }
         }
 
-        // تشغيل كود جلب المنتجات عند فتح الصفحة
         fetchProducts();
 
-        // خلفية Three.js المكعبات المتحركة
+        // خلفية Three.js
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ alpha: true });
@@ -487,10 +667,9 @@
         document.getElementById('canvas-container').appendChild(renderer.domElement);
 
         const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-        const material = new THREE.MeshBasicMaterial({ color: 0x8b5cf6, wireframe: true });
+        const material = new THREE.MeshBasicMaterial({ color: 0x7c3aed, wireframe: true });
         const cube = new THREE.Mesh(geometry, material);
         scene.add(cube);
-
         camera.position.z = 5;
 
         function animate() {
