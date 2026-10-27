@@ -247,7 +247,7 @@
             background: #6d28d9;
         }
 
-        /* نافذة تفاصيل المنتج الاحترافية (Gallery Modal) */
+        /* نافذة تفاصيل المنتج ومعرض الصور (Gallery Modal) */
         .product-detail-modal {
             position: fixed;
             top: 0;
@@ -316,7 +316,6 @@
             transform: scale(1.05);
         }
 
-        /* المودالز العامة للإدارة وكلمة السر */
         .password-modal, .admin-modal {
             position: fixed;
             top: 0;
@@ -398,7 +397,6 @@
             font-weight: 700;
         }
 
-        /* العربة الجانبية الفخمة */
         .cart-drawer {
             position: fixed;
             top: 0;
@@ -495,7 +493,6 @@
             background: #1ebe5d;
         }
 
-        /* الفوتر الفخم والسوشيال ميديا */
         footer {
             text-align: center;
             padding: 2.5rem 1rem;
@@ -600,9 +597,7 @@
     <div class="product-detail-modal" id="productDetailModal">
         <div class="detail-card">
             <button class="close-admin" onclick="closeProductModal()">&times;</button>
-            <div id="modalGalleryContent">
-                <!-- يتم تعبئته ديناميكياً -->
-            </div>
+            <div id="modalGalleryContent"></div>
         </div>
     </div>
 
@@ -638,7 +633,7 @@
         </div>
     </div>
 
-    <!-- لوحة التحكم لإضافة المنتج مع صور متعددة -->
+    <!-- لوحة التحكم لإضافة المنتجات -->
     <div class="admin-modal" id="adminModal">
         <div class="admin-card">
             <button class="close-admin" onclick="toggleAdminModal()">&times;</button>
@@ -663,7 +658,7 @@
                 <textarea id="prodDesc" rows="3" placeholder="وصف تفصيلي للخامات والمقاسات..."></textarea>
             </div>
             <div class="form-group">
-                <label>صور المنتج (اختر صورة أو عدة صور معاً من الاستوديو)</label>
+                <label>صور المنتج (اختر صورة أو عدة صور)</label>
                 <input type="file" id="prodImages" accept="image/*" multiple>
             </div>
             <button class="buy-btn" id="submitProdBtn" style="width: 100%; padding: 0.7rem; margin-top: 0.3rem;" onclick="uploadProduct()">نشر المنتج للمتجر فوراً</button>
@@ -675,8 +670,9 @@
             <i class="fa-solid fa-phone"></i> تواصل معنا: <a href="tel:01039432549" style="color: inherit; text-decoration: none;">01039432549</a>
         </div>
         <div class="social-links">
-            <a href="https://instagram.com/_bo3d__" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
-            <a href="https://tiktok.com/@_bo3d_" target="_blank" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+            <!-- الروابط المضبوطة بالشرطة التحتية أولاً كما طلبت -->
+            <a href="https://instagram.com/_bo3d" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+            <a href="https://tiktok.com/@_bo3d" target="_blank" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
             <a href="https://wa.me/201039432549" target="_blank" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
         </div>
         <p>جميع الحقوق محفوظة لمتجر <span class="secret-trigger" id="secretTrigger">بُعد &copy; 2026</span></p>
@@ -693,7 +689,6 @@
         let cart = [];
         let productsData = [];
 
-        // الضغطة المطولة للوحة التحكم السرية
         let pressTimer;
         const secretTrigger = document.getElementById('secretTrigger');
 
@@ -729,7 +724,6 @@
             document.getElementById('loadingStatus').style.display = 'none';
         }
 
-        // جلب المنتجات وعرضها في الشبكة
         async function fetchProducts() {
             const grid = document.getElementById('products-grid');
             const { data, error } = await _supabase.from('products').select('*');
@@ -748,7 +742,6 @@
 
             grid.innerHTML = '';
             productsData.forEach((product, index) => {
-                // استخراج الصورة الأولى لعرضها في الكارت الرئيسي
                 let images = product.image ? product.image.split(',') : ['https://via.placeholder.com/300'];
                 let mainImg = images[0].trim();
 
@@ -770,7 +763,6 @@
             });
         }
 
-        // فتح نافذة تفاصيل المنتج ومعرض الصور (Gallery) بأسلوب كرييتف وسلس
         function openProductModal(index) {
             const product = productsData[index];
             const modal = document.getElementById('productDetailModal');
@@ -804,7 +796,6 @@
             document.getElementById('productDetailModal').style.display = 'none';
         }
 
-        // رفع كذا صورة مع بعض للمنتج
         async function uploadProduct() {
             const name = document.getElementById('prodName').value;
             const price = document.getElementById('prodPrice').value;
@@ -918,7 +909,6 @@
             updateCartUI();
         }
 
-        // إرسال الطلب للواتساب
         async function checkoutWhatsApp() {
             const name = document.getElementById('customerName').value.trim();
             const phone = document.getElementById('customerPhone').value.trim();
@@ -972,7 +962,6 @@
 
         fetchProducts();
 
-        // خلفية 3D احترافية
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
