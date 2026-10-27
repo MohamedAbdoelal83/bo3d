@@ -337,7 +337,7 @@
             border-radius: 16px;
             padding: 1.2rem;
             width: 100%;
-            max-width: 380px;
+            max-width: 440px;
             box-shadow: 0 15px 40px rgba(6, 182, 212, 0.3);
             position: relative;
             max-height: 90vh;
@@ -348,7 +348,7 @@
             margin-bottom: 1rem;
             text-align: center;
             color: var(--accent-cyan);
-            font-size: 1.1rem;
+            font-size: 1.15rem;
         }
 
         .form-group {
@@ -395,6 +395,38 @@
             font-size: 0.85rem;
             margin-bottom: 0.8rem;
             font-weight: 700;
+        }
+
+        /* تنسيق جدول إدارة الأدمن للمنتجات القديمة */
+        .admin-product-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .admin-product-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        .admin-product-thumb {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 5px;
         }
 
         .cart-drawer {
@@ -593,7 +625,7 @@
         </div>
     </div>
 
-    <!-- نافذة تفاصيل المنتج ومعرض الصور (Product Detail Gallery Modal) -->
+    <!-- نافذة تفاصيل المنتج ومعرض الصور (Gallery Modal) -->
     <div class="product-detail-modal" id="productDetailModal">
         <div class="detail-card">
             <button class="close-admin" onclick="closeProductModal()">&times;</button>
@@ -633,35 +665,48 @@
         </div>
     </div>
 
-    <!-- لوحة التحكم لإضافة المنتجات -->
+    <!-- لوحة التحكم الكاملة (إضافة وتعديل وحذف المنتجات والصور) -->
     <div class="admin-modal" id="adminModal">
         <div class="admin-card">
             <button class="close-admin" onclick="toggleAdminModal()">&times;</button>
-            <h2>إضافة منتج جديد لـ "بُعد"</h2>
+            <h2>لوحة تحكم "بُعد" الاحترافية</h2>
             
             <div id="loadingStatus">جاري التحضير...</div>
 
-            <div class="form-group">
-                <label>اسم المنتج</label>
-                <input type="text" id="prodName" placeholder="مثال: مجسم هرمي عالي الدقة">
+            <!-- قسم إضافة منتج جديد -->
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 10px; border-radius: 10px; margin-bottom: 1rem;">
+                <h3 style="color: var(--accent-cyan); font-size: 0.95rem; margin-bottom: 0.5rem;"><i class="fa-solid fa-plus-circle"></i> إضافة منتج جديد</h3>
+                <div class="form-group">
+                    <label>اسم المنتج</label>
+                    <input type="text" id="prodName" placeholder="مثال: مجسم هرمي عالي الدقة">
+                </div>
+                <div class="form-group">
+                    <label>السعر (ج.م)</label>
+                    <input type="number" id="prodPrice" placeholder="مثال: 250">
+                </div>
+                <div class="form-group">
+                    <label>القسم (Category)</label>
+                    <input type="text" id="prodCategory" value="عام" placeholder="مثال: مجسمات">
+                </div>
+                <div class="form-group">
+                    <label>الوصف</label>
+                    <textarea id="prodDesc" rows="2" placeholder="وصف تفصيلي..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>صور المنتج (اختر صورة أو عدة صور)</label>
+                    <input type="file" id="prodImages" accept="image/*" multiple>
+                </div>
+                <button class="buy-btn" id="submitProdBtn" style="width: 100%; padding: 0.6rem; margin-top: 0.3rem;" onclick="uploadProduct()">نشر المنتج للمتجر</button>
             </div>
-            <div class="form-group">
-                <label>السعر (بالجنيه المصري)</label>
-                <input type="number" id="prodPrice" placeholder="مثال: 250">
+
+            <!-- قسم إدارة المنتجات الحالية (تعديل وحذف) -->
+            <div>
+                <h3 style="color: var(--accent-cyan); font-size: 0.95rem; margin-bottom: 0.5rem;"><i class="fa-solid fa-boxes-stacked"></i> إدارة المنتجات القديمة والمسجلة</h3>
+                <div id="adminProductsList" style="max-height: 250px; overflow-y: auto;">
+                    <p style="color: var(--text-muted); font-size: 0.8rem; text-align: center;">جاري تحميل المنتجات...</p>
+                </div>
             </div>
-            <div class="form-group">
-                <label>القسم (Category)</label>
-                <input type="text" id="prodCategory" value="عام" placeholder="مثال: مجسمات، ديكور">
-            </div>
-            <div class="form-group">
-                <label>الوصف</label>
-                <textarea id="prodDesc" rows="3" placeholder="وصف تفصيلي للخامات والمقاسات..."></textarea>
-            </div>
-            <div class="form-group">
-                <label>صور المنتج (اختر صورة أو عدة صور)</label>
-                <input type="file" id="prodImages" accept="image/*" multiple>
-            </div>
-            <button class="buy-btn" id="submitProdBtn" style="width: 100%; padding: 0.7rem; margin-top: 0.3rem;" onclick="uploadProduct()">نشر المنتج للمتجر فوراً</button>
+
         </div>
     </div>
 
@@ -670,7 +715,6 @@
             <i class="fa-solid fa-phone"></i> تواصل معنا: <a href="tel:01039432549" style="color: inherit; text-decoration: none;">01039432549</a>
         </div>
         <div class="social-links">
-            <!-- الروابط المضبوطة بالشرطة التحتية أولاً كما طلبت -->
             <a href="https://instagram.com/_bo3d" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
             <a href="https://tiktok.com/@_bo3d" target="_blank" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
             <a href="https://wa.me/201039432549" target="_blank" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
@@ -720,8 +764,12 @@
 
         function toggleAdminModal() {
             const modal = document.getElementById('adminModal');
-            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+            const isOpen = modal.style.display === 'flex';
+            modal.style.display = isOpen ? 'none' : 'flex';
             document.getElementById('loadingStatus').style.display = 'none';
+            if (!isOpen) {
+                renderAdminProductsList();
+            }
         }
 
         async function fetchProducts() {
@@ -761,6 +809,76 @@
                     </div>
                 `;
             });
+        }
+
+        // عرض المنتجات داخل لوحة الأدمن لتعديلها أو حذفها
+        function renderAdminProductsList() {
+            const listContainer = document.getElementById('adminProductsList');
+            if (productsData.length === 0) {
+                listContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 0.8rem; text-align: center;">لا توجد منتجات مسجلة.</p>';
+                return;
+            }
+
+            listContainer.innerHTML = '';
+            productsData.forEach((prod) => {
+                let images = prod.image ? prod.image.split(',') : ['https://via.placeholder.com/100'];
+                let thumb = images[0].trim();
+
+                listContainer.innerHTML += `
+                    <div class="admin-product-item">
+                        <div class="admin-product-info">
+                            <img src="${thumb}" class="admin-product-thumb">
+                            <div>
+                                <div style="font-size: 0.8rem; font-weight: 700; color: #fff; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${prod.name}</div>
+                                <div style="font-size: 0.75rem; color: var(--accent-cyan);">${prod.price} ج.م</div>
+                            </div>
+                        </div>
+                        <div class="admin-actions">
+                            <button onclick="editProductPrompt('${prod.id}', '${prod.name}', ${prod.price})" style="background: var(--accent-cyan); color: var(--bg-primary); border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: 700;" title="تعديل السعر والاسم"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteProduct('${prod.id}')" style="background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;" title="حذف المنتج"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // تعديل اسم وسعر المنتج مباشرة من لوحة الأدمن
+        async function editProductPrompt(id, oldName, oldPrice) {
+            const newName = prompt("تعديل اسم المنتج:", oldName);
+            if (newName === null) return;
+            const newPrice = prompt("تعديل السعر (ج.م):", oldPrice);
+            if (newPrice === null) return;
+
+            if (!newName.trim() || isNaN(newPrice)) {
+                alert('الرجاء إدخال بيانات صحيحة!');
+                return;
+            }
+
+            const { error } = await _supabase.from('products').update({
+                name: newName.trim(),
+                price: parseFloat(newPrice)
+            }).eq('id', id);
+
+            if (error) {
+                alert('خطأ في التعديل: ' + error.message);
+            } else {
+                alert('تم تحديث بيانات المنتج بنجاح!');
+                fetchProducts().then(() => renderAdminProductsList());
+            }
+        }
+
+        // حذف منتج بالكامل
+        async function deleteProduct(id) {
+            if (!confirm('هل أنت متأكد من حذف هذا المنتج نهائياً من المتجر؟')) return;
+
+            const { error } = await _supabase.from('products').delete().eq('id', id);
+
+            if (error) {
+                alert('خطأ في الحذف: ' + error.message);
+            } else {
+                alert('تم حذف المنتج بنجاح!');
+                fetchProducts().then(() => renderAdminProductsList());
+            }
         }
 
         function openProductModal(index) {
