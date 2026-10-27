@@ -397,7 +397,6 @@
             font-weight: 700;
         }
 
-        /* تنسيق جدول إدارة الأدمن للمنتجات القديمة */
         .admin-product-item {
             display: flex;
             align-items: center;
@@ -811,7 +810,6 @@
             });
         }
 
-        // عرض المنتجات داخل لوحة الأدمن لتعديلها أو حذفها
         function renderAdminProductsList() {
             const listContainer = document.getElementById('adminProductsList');
             if (productsData.length === 0) {
@@ -834,7 +832,7 @@
                             </div>
                         </div>
                         <div class="admin-actions">
-                            <button onclick="editProductPrompt('${prod.id}', '${prod.name}', ${prod.price})" style="background: var(--accent-cyan); color: var(--bg-primary); border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: 700;" title="تعديل السعر والاسم"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="editProductPrompt('${prod.id}', '${prod.name.replace(/'/g, "\\'")}', ${prod.price})" style="background: var(--accent-cyan); color: var(--bg-primary); border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: 700;" title="تعديل السعر والاسم"><i class="fa-solid fa-pen"></i></button>
                             <button onclick="deleteProduct('${prod.id}')" style="background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;" title="حذف المنتج"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
@@ -842,7 +840,7 @@
             });
         }
 
-        // تعديل اسم وسعر المنتج مباشرة من لوحة الأدمن
+        // تم تعديلها لتحدث الاسم والسعر معاً بنجاح تام
         async function editProductPrompt(id, oldName, oldPrice) {
             const newName = prompt("تعديل اسم المنتج:", oldName);
             if (newName === null) return;
@@ -862,12 +860,11 @@
             if (error) {
                 alert('خطأ في التعديل: ' + error.message);
             } else {
-                alert('تم تحديث بيانات المنتج بنجاح!');
+                alert('تم تحديث الاسم والسعر بنجاح!');
                 fetchProducts().then(() => renderAdminProductsList());
             }
         }
 
-        // حذف منتج بالكامل
         async function deleteProduct(id) {
             if (!confirm('هل أنت متأكد من حذف هذا المنتج نهائياً من المتجر؟')) return;
 
